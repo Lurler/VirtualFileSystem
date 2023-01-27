@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualFileSystem", "VirtualFileSystem\VirtualFileSystem.csproj", "{506709BF-EF2B-41DC-9FB2-3450D01FAE41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VFSTest", "VFSTest\VFSTest.csproj", "{D8C040D8-28E7-4785-AF22-F306F9F99796}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{506709BF-EF2B-41DC-9FB2-3450D01FAE41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{506709BF-EF2B-41DC-9FB2-3450D01FAE41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{506709BF-EF2B-41DC-9FB2-3450D01FAE41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{506709BF-EF2B-41DC-9FB2-3450D01FAE41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8C040D8-28E7-4785-AF22-F306F9F99796}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8C040D8-28E7-4785-AF22-F306F9F99796}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8C040D8-28E7-4785-AF22-F306F9F99796}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8C040D8-28E7-4785-AF22-F306F9F99796}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A35E1D1F-C1CA-4299-B703-EC827562120F}
+	EndGlobalSection
+EndGlobal

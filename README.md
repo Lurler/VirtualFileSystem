@@ -1,2 +1,53 @@
 # VirtualFileSystem
-**Virtual File System** is framework to create in-memory virtual file system which allow you to include several folders or zipped archives in a specific order and their file structure will be merged creating a unified file hierarchy while (virtually) overriding any files that have the same paths.
+As the name implies **Virtual File System** is framework to create in-memory virtual file system which allow you to include several folders or zipped archives in a specific order and their file structure will be merged creating a unified file hierarchy while (virtually) overriding any files that have the same paths.
+
+It could be used as a basis for modding system in your game where you (or people modding your game) can override certain files of the base game with updated files or add new files into the hierarchy seamlessly.
+
+Note on file overridding - if you include "mod1" that contains "file1.txt" and then include "mod2" which contains a different file but with with the same path "file1.txt" it will then be overriden since mod2 was included after mod1. Similar approach to modding is actually already present in a number of games. This approach can also be used not only for modding, but to allow loading of DLC content or any other extra content into the game.
+
+**Virtual File System** supports both: folders and zipped archives, and is developed in pure C# with no external dependencies.
+
+The goal of this framework is to make adding mod support to games as easy as it can possibly be. It offers a clean, minimalist, and fully documented API that is easy to learn and use.
+
+## Installation
+Use provided nuget package or download the source.
+
+:wrench: Nuget: `dotnet add package VirtualFileSystem`
+
+## Quick start
+First, create a new vfs container and add any number of root folders (at least one is required).
+
+```cs
+// Create VFS and include several root containers
+var vfs = new VFSManager();
+vfs.AddRootContainer("Data/ModFolder1"); // folder with the name "ModFolder1"
+vfs.AddRootContainer("Data/ModFolder2"); // folder with the name "ModFolder2"
+vfs.AddRootContainer("Data/Mod3.pak"); // zip archive with the name "Mod3.pak"
+```
+
+Next... well, that's it! Now you can read files from the VFS as needed :)
+
+```cs
+// check if file exists
+bool fileExists = vfs.FileExists(virtualPath);
+
+// get file stream
+Stream stream = vfs.GetFileStream(virtualPath);
+
+// get all contents of the file as byte array
+byte[] content = vfs.GetFileContents(virtualPath)
+
+// you can get a list of all entry paths
+List<string> allEntries = vfs.Entries;
+```
+
+## Changes
+ - v1.0 - Initial release.
+
+## Contribution
+Contributions are welcome!
+
+You can start with submitting an [issue on GitHub](https://github.com/Lurler/VirtualFileSystem/issues).
+
+## License
+**Virtual File System** is released under the [MIT License](../master/LICENSE).
