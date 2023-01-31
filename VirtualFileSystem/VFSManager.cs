@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace VirtualFileSystem;
 
@@ -12,6 +13,11 @@ public class VFSManager
     /// if the virtual paths collide.
     /// </summary>
     private readonly Dictionary<string, VirtualFile> virtualFiles = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Stores all folders that exist in the VFS with at least one file.
+    /// </summary>
+    private readonly List<string> virtualFolders = new();
 
     /// <summary>
     /// Adds a new root container which can be either a folder on the hard drive or a zip file.
@@ -54,12 +60,21 @@ public class VFSManager
             var zip = ZipFile.OpenRead(path);
             foreach (var entry in zip.Entries)
             {
+                // skip directories
+                if (entry.FullName.Last() == '/')
+                    continue;
+
                 // create virtual file
                 var virtualPath = FormatPath(entry.FullName);
                 var virtualFile = new VirtualFile(zip, entry.FullName);
 
                 // add it to the list of virtual files
                 virtualFiles[virtualPath] = virtualFile;
+
+                // register virtual folder if it isn't registered yet
+                var virtualFolder = Path.GetDirectoryName(virtualPath) + '/';
+                if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder))
+                    virtualFolders.Add(virtualFolder);
             }
         }
         catch
@@ -91,6 +106,11 @@ public class VFSManager
                 virtualFiles[relativePath] = vf;
             else
                 virtualFiles.Add(relativePath, vf);
+
+            // register virtual folder if it isn't registered yet
+            var virtualFolder = Path.GetDirectoryName(relativePath) + '/';
+            if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder))
+                virtualFolders.Add(virtualFolder);
         }
 
     }
@@ -101,6 +121,18 @@ public class VFSManager
     public bool FileExists(string virtualPath)
     {
         return virtualFiles.ContainsKey(FormatPath(virtualPath));
+    }
+
+    /// <summary>
+    /// Checks if a folder with a given virtual path exists in the VFS.
+    /// </summary>
+    public bool FolderExists(string virtualPath)
+    {
+        // add final slash if needed
+        if (virtualPath.Last() != '/')
+            virtualPath += '/';
+
+        return virtualFolders.Contains(FormatPath(virtualPath));
     }
 
     /// <summary>
@@ -120,7 +152,32 @@ public class VFSManager
     }
 
     /// <summary>
-    /// Get list of all entries in the VFS.
+    /// Get list of files in a given folder (list of paths).
+    /// </summary>
+    public List<string> GetFilesInFolder(string virtualPath)
+    {
+        // add final slash if needed
+        if (virtualPath.Length == 0 || virtualPath.Last() != '/')
+            virtualPath += '/';
+
+        // check if we want files in root folder
+        if (virtualPath == "/")
+            return virtualFiles.Keys.Where(s => !s.Contains('/')).ToList();
+
+        // return empty list if no such file path exists
+        if (!virtualFolders.Contains(virtualPath))
+            return new List<string>();
+
+        // prepare regex
+        var regexString = "^" + virtualPath.Replace("/", @"\/") + @"[^\/]*";
+        var regex = new Regex(regexString, RegexOptions.IgnoreCase);
+
+        // get all files that are inside the provided path
+        return virtualFiles.Keys.Where(s => regex.IsMatch(s)).ToList();
+    }
+
+    /// <summary>
+    /// Get list of all file entries in the VFS.
     /// </summary>
     public List<string> Entries => virtualFiles.Keys.ToList();
 

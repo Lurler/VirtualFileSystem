@@ -53,13 +53,26 @@ class Program
             Console.WriteLine("File [" + nonExistentFilePath + "] does not exist.");
         }
 
+        Console.WriteLine("Files count in folder [] -> "+vfs.GetFilesInFolder("").Count);
+        Console.WriteLine("Files count in folder [/] -> " + vfs.GetFilesInFolder("/").Count);
+        Console.WriteLine("Files count in folder [folder] -> " + vfs.GetFilesInFolder("folder").Count);
+        Console.WriteLine("Files count in folder [folder/] -> " + vfs.GetFilesInFolder("folder/").Count);
+        Console.WriteLine("Files count in folder [folder2] -> " + vfs.GetFilesInFolder("folder2").Count);
+        Console.WriteLine("Files count in folder [folder2/] -> " + vfs.GetFilesInFolder("folder2/").Count);
+
         // Output will be:
         //     Virtual path [file1.txt] -> "file1 in mod1"
         //     Virtual path [file2.txt] -> "file2 in mod2"
         //     Virtual path [folder/file3.txt] -> "file3 in mod2/folder"
         //     Virtual path [file4.txt] -> "file4 in the zipped mod3"
         //     Virtual path [folder2/file5.txt] -> "file5 in the zipped mod3/folder2"
-        //     File[non-existent-file.txt] does not exist.
+        //     File [non-existent-file.txt] does not exist.
+        //     Files count in folder[] -> 3
+        //     Files count in folder[/] -> 3
+        //     Files count in folder[folder] -> 1
+        //     Files count in folder[folder/] -> 1
+        //     Files count in folder[folder2] -> 1
+        //     Files count in folder[folder2/] -> 1
     }
 
 }
