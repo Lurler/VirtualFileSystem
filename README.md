@@ -38,7 +38,7 @@ bool folderExists = vfs.FolderExists(virtualPath);
 Stream stream = vfs.GetFileStream(virtualPath);
 
 // get all contents of the file as byte array
-byte[] content = vfs.GetFileContents(virtualPath)
+byte[] content = vfs.GetFileContents(virtualPath);
 
 // you can get a list of all entry paths
 List<string> allEntries = vfs.Entries;
