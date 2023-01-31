@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Text;
-using VirtualFileSystem;
-using static System.Net.WebRequestMethods;
+﻿using VirtualFileSystem;
 
 namespace VFSTest;
 
@@ -53,7 +50,7 @@ class Program
             Console.WriteLine("File [" + nonExistentFilePath + "] does not exist.");
         }
 
-        Console.WriteLine("Files count in folder [] -> "+vfs.GetFilesInFolder("").Count);
+        Console.WriteLine("Files count in folder [] -> " + vfs.GetFilesInFolder("").Count);
         Console.WriteLine("Files count in folder [/] -> " + vfs.GetFilesInFolder("/").Count);
         Console.WriteLine("Files count in folder [folder] -> " + vfs.GetFilesInFolder("folder").Count);
         Console.WriteLine("Files count in folder [folder/] -> " + vfs.GetFilesInFolder("folder/").Count);
