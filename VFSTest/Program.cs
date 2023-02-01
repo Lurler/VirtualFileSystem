@@ -56,6 +56,7 @@ class Program
         Console.WriteLine("Files count in folder [folder/] -> " + vfs.GetFilesInFolder("folder/").Count);
         Console.WriteLine("Files count in folder [folder2] -> " + vfs.GetFilesInFolder("folder2").Count);
         Console.WriteLine("Files count in folder [folder2/] -> " + vfs.GetFilesInFolder("folder2/").Count);
+        Console.WriteLine("Files count in folder [] with extension [txt] -> " + vfs.GetFilesInFolder("", "txt").Count);
 
         // Output will be:
         //     Virtual path [file1.txt] -> "file1 in mod1"
@@ -70,6 +71,7 @@ class Program
         //     Files count in folder[folder/] -> 1
         //     Files count in folder[folder2] -> 1
         //     Files count in folder[folder2/] -> 1
+        //     Files count in folder [] with extension [txt] -> 3
     }
 
 }

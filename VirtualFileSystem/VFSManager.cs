@@ -12,7 +12,7 @@ public class VFSManager
     /// Stores paths to all files in the VFS with newer files overriding the existing files as they are loaded
     /// if the virtual paths collide.
     /// </summary>
-    private readonly Dictionary<string, VirtualFile> virtualFiles = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, BaseVirtualFile> virtualFiles = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Stores all folders that exist in the VFS with at least one file.
@@ -45,7 +45,7 @@ public class VFSManager
     /// <summary>
     /// Formats virtual path to be uniform, so there are no identical entries but with different paths.
     /// </summary>
-    private string FormatPath(string path)
+    private string NormalizePath(string path)
     {
         return path
             .Replace(@"\\", @"\")
@@ -64,12 +64,11 @@ public class VFSManager
                 if (entry.FullName.Last() == '/')
                     continue;
 
-                // create virtual file
-                var virtualPath = FormatPath(entry.FullName);
-                var virtualFile = new VirtualFile(zip, entry.FullName);
+                // standardize slashes
+                var virtualPath = NormalizePath(entry.FullName);
 
-                // add it to the list of virtual files
-                virtualFiles[virtualPath] = virtualFile;
+                // create a virtual file, then add or replace it in the dictionary
+                virtualFiles[virtualPath] = new VirtualZippedFile(zip, entry.FullName);
 
                 // register virtual folder if it isn't registered yet
                 var virtualFolder = Path.GetDirectoryName(virtualPath) + '/';
@@ -96,16 +95,10 @@ public class VFSManager
         foreach (string file in files)
         {
             // standardize slashes
-            var relativePath = FormatPath(file);
+            var relativePath = NormalizePath(file);
 
-            // create virtual file and add into dictionary
-            var vf = new VirtualFile(path + "/" + file);
-
-            // add new if doesn't exists or replace
-            if (virtualFiles.ContainsKey(relativePath))
-                virtualFiles[relativePath] = vf;
-            else
-                virtualFiles.Add(relativePath, vf);
+            // create a virtual file, then add or replace it in the dictionary
+            virtualFiles[relativePath] = new VirtualOSFile(path + "/" + file);
 
             // register virtual folder if it isn't registered yet
             var virtualFolder = Path.GetDirectoryName(relativePath) + '/';
@@ -120,7 +113,7 @@ public class VFSManager
     /// </summary>
     public bool FileExists(string virtualPath)
     {
-        return virtualFiles.ContainsKey(FormatPath(virtualPath));
+        return virtualFiles.ContainsKey(NormalizePath(virtualPath));
     }
 
     /// <summary>
@@ -129,10 +122,10 @@ public class VFSManager
     public bool FolderExists(string virtualPath)
     {
         // add final slash if needed
-        if (virtualPath.Last() != '/')
+        if (virtualPath[^1] != '/')
             virtualPath += '/';
 
-        return virtualFolders.Contains(FormatPath(virtualPath));
+        return virtualFolders.Contains(NormalizePath(virtualPath));
     }
 
     /// <summary>
@@ -140,7 +133,7 @@ public class VFSManager
     /// </summary>
     public Stream GetFileStream(string virtualPath)
     {
-        return virtualFiles[FormatPath(virtualPath)].GetFileStream();
+        return virtualFiles[NormalizePath(virtualPath)].GetFileStream();
     }
 
     /// <summary>
@@ -148,7 +141,7 @@ public class VFSManager
     /// </summary>
     public byte[] GetFileContents(string virtualPath)
     {
-        return virtualFiles[FormatPath(virtualPath)].GetData();
+        return virtualFiles[NormalizePath(virtualPath)].GetData();
     }
 
     /// <summary>
@@ -168,17 +161,26 @@ public class VFSManager
         if (!virtualFolders.Contains(virtualPath))
             return new List<string>();
 
-        // prepare regex
-        var regexString = "^" + virtualPath.Replace("/", @"\/") + @"[^\/]*";
-        var regex = new Regex(regexString, RegexOptions.IgnoreCase);
-
         // get all files that are inside the provided path
-        return virtualFiles.Keys.Where(s => regex.IsMatch(s)).ToList();
+        return virtualFiles.Keys
+            .Where(s => s.StartsWith(virtualPath, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Get list of files in a given folder (list of paths) with additional extension filtering.
+    /// Extension string must be provided without a dot.
+    /// </summary>
+    public List<string> GetFilesInFolder(string virtualPath, string extension)
+    {
+        return GetFilesInFolder(virtualPath)
+            .Where(s => s.EndsWith("." + extension, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     /// <summary>
     /// Get list of all file entries in the VFS.
     /// </summary>
-    public List<string> Entries => virtualFiles.Keys.ToList();
+    public IReadOnlyCollection<string> Entries => virtualFiles.Keys;
 
 }

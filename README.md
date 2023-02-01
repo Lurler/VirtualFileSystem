@@ -1,9 +1,9 @@
 # VirtualFileSystem
-As the name implies **Virtual File System** (VFS) is framework to create in-memory virtual file system which allow you to include ("mount") several folders or zipped archives in a specific order and their file structure will be merged creating a unified file hierarchy while (virtually) overriding any files that have the same paths.
+As the name implies **Virtual File System** (VFS) is framework to create a virtual file system which allow you to include ("mount") several folders or zipped archives in a specific order merging their file structure and creating a unified file hierarchy while (virtually) overriding any files that have the same paths.
 
-It could be used as a basis for modding system in your game where you (or people modding your game) can override certain files of the base game with updated files or add new files into the hierarchy seamlessly.
+It could be used as a basis for modding/DLC/addon system in your game where you (or people modding your game) can override existing files of the base game with updated versions or add new files into the hierarchy seamlessly.
 
-Note on file overridding: if you include "mod1" that contains "folder1/file1.txt" and then include "mod2" which contains a different file but with with the same path "folder1/file1.txt" it will then be overriden since mod2 was included after mod1. Similar approach to modding is actually already present in a large number of games. This approach can also be used not only for modding, but to allow loading of DLC content or any other extra content into the game.
+Note on file overridding: if you include "mod1" that contains "folder1/file1.txt" and then include "mod2" which contains a different file but with with the same path "folder1/file1.txt" it will then be overriden since mod2 was included after mod1. Similar approach to modding is actually already present in a large number of games. Additionally, as stated above this approach can also be used not only for modding, but to allow loading of additional content (e.g. DLC) or any other extra data into the game.
 
 **Virtual File System** supports both: folders and zipped archives, and is developed in pure C# with no external dependencies.
 
@@ -45,9 +45,13 @@ List<string> allEntries = vfs.Entries;
 
 // you can also get all files in a specific folder
 List<string> filesInFolder = vfs.GetFilesInFolder(virtualPath);
+
+// same as above, but you can also filter by extension
+List<string> filesInFolderWithExtension = vfs.GetFilesInFolder(virtualPath, "txt");
 ```
 
 ## Changes
+ - v1.2 - Some refactoring and improvements based on feedback received.
  - v1.1 - Added folder indexing, some edge case checks and some minor improvements.
  - v1.0 - Initial release.
 
