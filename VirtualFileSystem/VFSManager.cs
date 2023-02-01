@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using System.Text.RegularExpressions;
 
 namespace VirtualFileSystem;
 

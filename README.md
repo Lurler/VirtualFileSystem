@@ -1,5 +1,5 @@
 # VirtualFileSystem
-As the name implies **Virtual File System** (VFS) is framework to create a virtual file system which allow you to include ("mount") several folders or zipped archives in a specific order merging their file structure and creating a unified file hierarchy while (virtually) overriding any files that have the same paths.
+As the name implies **Virtual File System** (VFS) is a framework to create a virtual file system which allow you to include ("mount") several folders or zipped archives in a specific order merging their file structure and creating a unified file hierarchy while (virtually) overriding any files that have the same paths.
 
 It could be used as a basis for modding/DLC/addon system in your game where you (or people modding your game) can override existing files of the base game with updated versions or add new files into the hierarchy seamlessly.
 
