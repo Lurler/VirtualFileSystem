@@ -12,7 +12,9 @@ The goal of this framework is to make adding mod support to games as easy as it 
 ## Installation
 Use provided nuget package or download the source.
 
-:wrench: Nuget: `dotnet add package VirtualFileSystem`
+[![NuGet](https://img.shields.io/nuget/v/VirtualFileSystem.svg?style=for-the-badge)](https://www.nuget.org/packages/VirtualFileSystem)
+
+:wrench: `dotnet add package VirtualFileSystem`
 
 ## Quick start
 First, create a new vfs container and add any number of root folders (at least one is required).
