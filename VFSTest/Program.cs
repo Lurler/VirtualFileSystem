@@ -13,18 +13,25 @@ class Program
         vfs.AddRootContainer("Data/Mod2.pak"); // folder with the name "Mod2.pak"
         vfs.AddRootContainer("Data/Mod3.pak"); // zip archive with the name "Mod3.pak"
 
-        // Files we want to check
-        string[] virtualPaths =
+        // first display all files
+        Console.WriteLine("Entries in VFS: ");
+        foreach (var item in vfs.Entries)
         {
-            "file1.txt",
-            "file2.txt",
-            "folder/file3.txt",
-            "file4.txt",
-            "folder2/file5.txt",
-        };
+            Console.WriteLine("> " + item);
+        }
+        Console.WriteLine();
 
-        // iterate over all of the files
-        foreach (string path in virtualPaths)
+        // and also folders
+        Console.WriteLine("Folders in VFS: ");
+        foreach (var item in vfs.Folders)
+        {
+            Console.WriteLine("> " + item);
+        }
+        Console.WriteLine();
+
+        // iterate over all of the files and get their contents
+        Console.WriteLine("Reading file contents: ");
+        foreach (string path in vfs.Entries)
         {
             // get file stream
             var stream = vfs.GetFileStream(path);
@@ -49,7 +56,9 @@ class Program
         {
             Console.WriteLine("File [" + nonExistentFilePath + "] does not exist.");
         }
+        Console.WriteLine();
 
+        // count files
         Console.WriteLine("Files count in folder [] -> " + vfs.GetFilesInFolder("").Count);
         Console.WriteLine("Files count in folder [/] -> " + vfs.GetFilesInFolder("/").Count);
         Console.WriteLine("Files count in folder [folder] -> " + vfs.GetFilesInFolder("folder").Count);
@@ -57,21 +66,32 @@ class Program
         Console.WriteLine("Files count in folder [folder2] -> " + vfs.GetFilesInFolder("folder2").Count);
         Console.WriteLine("Files count in folder [folder2/] -> " + vfs.GetFilesInFolder("folder2/").Count);
         Console.WriteLine("Files count in folder [] with extension [txt] -> " + vfs.GetFilesInFolder("", "txt").Count);
+        Console.WriteLine();
 
-        // Output will be:
-        //     Virtual path [file1.txt] -> "file1 in mod1"
-        //     Virtual path [file2.txt] -> "file2 in mod2"
-        //     Virtual path [folder/file3.txt] -> "file3 in mod2/folder"
-        //     Virtual path [file4.txt] -> "file4 in the zipped mod3"
-        //     Virtual path [folder2/file5.txt] -> "file5 in the zipped mod3/folder2"
-        //     File [non-existent-file.txt] does not exist.
-        //     Files count in folder[] -> 3
-        //     Files count in folder[/] -> 3
-        //     Files count in folder[folder] -> 1
-        //     Files count in folder[folder/] -> 1
-        //     Files count in folder[folder2] -> 1
-        //     Files count in folder[folder2/] -> 1
-        //     Files count in folder [] with extension [txt] -> 3
+        // check recursion
+        Console.WriteLine("Get file list recursively:");
+        var list1 = vfs.GetFilesInFolder("",false);
+        Console.WriteLine("Files in root no recursion: " + string.Join(", ", list1));
+        var list2 = vfs.GetFilesInFolder("", true);
+        Console.WriteLine("Files in root with recursion: " + string.Join(", ", list2));
+        var list3 = vfs.GetFilesInFolder("folder/",false);
+        Console.WriteLine("Files in \"folder\" folder no recursion: " + string.Join(", ", list3));
+        var list4 = vfs.GetFilesInFolder("folder/", true);
+        Console.WriteLine("Files in \"folder\" folder with recursion: " + string.Join(", ", list4));
+        Console.WriteLine();
+
+        // check recursion 2
+        Console.WriteLine("Get folder list recursively:");
+        var list5 = vfs.GetFoldersInFolder("", false);
+        Console.WriteLine("Folders in root no recursion: " + string.Join(", ", list5));
+        var list6 = vfs.GetFoldersInFolder("", true);
+        Console.WriteLine("Folders in root with recursion: " + string.Join(", ", list6));
+        var list7 = vfs.GetFoldersInFolder("folder/", false);
+        Console.WriteLine("Folders in \"folder\" no recursion: " + string.Join(", ", list7));
+        var list8 = vfs.GetFoldersInFolder("folder/", true);
+        Console.WriteLine("Folders in \"folder\" with recursion: " + string.Join(", ", list8));
+
+        Console.ReadLine();
     }
 
 }

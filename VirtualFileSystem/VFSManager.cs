@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using System.Text;
 
 namespace VirtualFileSystem;
 
@@ -16,7 +17,17 @@ public class VFSManager
     /// <summary>
     /// Stores all folders that exist in the VFS with at least one file.
     /// </summary>
-    private readonly List<string> virtualFolders = new();
+    private readonly HashSet<string> virtualFolders = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Get a list of all virtual file entries in the VFS.
+    /// </summary>
+    public List<string> Entries => virtualFiles.Keys.ToList();
+
+    /// <summary>
+    /// Get a list of all virtual folders in the VFS.
+    /// </summary>
+    public List<string> Folders => virtualFolders.ToList();
 
     /// <summary>
     /// Adds a new root container which can be either a folder on the hard drive or a zip file.
@@ -70,14 +81,22 @@ public class VFSManager
                 virtualFiles[virtualPath] = new VirtualZippedFile(zip, entry.FullName);
 
                 // register virtual folder if it isn't registered yet
-                var virtualFolder = Path.GetDirectoryName(virtualPath) + '/';
-                if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder))
-                    virtualFolders.Add(virtualFolder);
+                var virtualFolder = NormalizePath(Path.GetDirectoryName(virtualPath) ?? "");
+                if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder + "/"))
+                    virtualFolders.Add(virtualFolder + "/");
             }
         }
-        catch
+        catch (InvalidDataException ex)
         {
-            throw new ArgumentException("Incorrect container. The vfs container must be a folder or a zip archive.");
+            throw new ArgumentException("The zip archive is invalid.", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new ArgumentException("Failed to access the zip archive.", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new ArgumentException("Incorrect container. The vfs container must be a folder or a zip archive.", ex);
         }
     }
 
@@ -100,9 +119,9 @@ public class VFSManager
             virtualFiles[relativePath] = new VirtualOSFile(path + "/" + file);
 
             // register virtual folder if it isn't registered yet
-            var virtualFolder = Path.GetDirectoryName(relativePath) + '/';
-            if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder))
-                virtualFolders.Add(virtualFolder);
+            var virtualFolder = NormalizePath(Path.GetDirectoryName(relativePath) ?? "");
+            if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder + "/"))
+                virtualFolders.Add(virtualFolder + "/");
         }
 
     }
@@ -132,7 +151,11 @@ public class VFSManager
     /// </summary>
     public Stream GetFileStream(string virtualPath)
     {
-        return virtualFiles[NormalizePath(virtualPath)].GetFileStream();
+        if (!virtualFiles.TryGetValue(NormalizePath(virtualPath), out BaseVirtualFile? value))
+        {
+            throw new FileNotFoundException($"The virtual file '{virtualPath}' does not exist.");
+        }
+        return value.GetFileStream();
     }
 
     /// <summary>
@@ -140,13 +163,28 @@ public class VFSManager
     /// </summary>
     public byte[] GetFileContents(string virtualPath)
     {
-        return virtualFiles[NormalizePath(virtualPath)].GetData();
+        if (!virtualFiles.TryGetValue(NormalizePath(virtualPath), out BaseVirtualFile? value))
+        {
+            throw new FileNotFoundException($"The virtual file '{virtualPath}' does not exist.");
+        }
+        return value.GetData();
+    }
+
+    /// <summary>
+    /// Read all data from the file and return it as text.
+    /// </summary>
+    public string GetFileContentsAsText(string virtualPath, Encoding? encoding = null)
+    {
+        encoding ??= Encoding.UTF8;  // defaults to UTF-8 if no encoding is provided
+        using var stream = GetFileStream(virtualPath);
+        using var reader = new StreamReader(stream, encoding);
+        return reader.ReadToEnd();
     }
 
     /// <summary>
     /// Get list of files in a given folder (list of paths).
     /// </summary>
-    public List<string> GetFilesInFolder(string virtualPath)
+    public List<string> GetFilesInFolder(string virtualPath, bool recursive = false)
     {
         // add final slash if needed
         if (virtualPath.Length == 0 || virtualPath.Last() != '/')
@@ -154,32 +192,58 @@ public class VFSManager
 
         // check if we want files in root folder
         if (virtualPath == "/")
-            return virtualFiles.Keys.Where(s => !s.Contains('/')).ToList();
+            return recursive 
+                ? virtualFiles.Keys.ToList()
+                : virtualFiles.Keys.Where(s => !s.Contains('/')).ToList();
 
-        // return empty list if no such file path exists
+        // return empty list if no such path exists
         if (!virtualFolders.Contains(virtualPath))
-            return new List<string>();
+            return new();
 
-        // get all files that are inside the provided path
         return virtualFiles.Keys
-            .Where(s => s.StartsWith(virtualPath, StringComparison.OrdinalIgnoreCase))
+            .Where(s => recursive
+                ? s.StartsWith(virtualPath, StringComparison.OrdinalIgnoreCase)
+                : Path.GetDirectoryName(s) == virtualPath.TrimEnd('/')) // non-recursive: only match files directly in the folder
             .ToList();
+    }
+
+    /// <summary>
+    /// Get list of folders in a given folder (list of paths).
+    /// </summary>
+    public List<string> GetFoldersInFolder(string virtualPath, bool recursive = false)
+    {
+        // add final slash if needed
+        if (virtualPath.Length > 0 && virtualPath.Last() != '/')
+            virtualPath += '/';
+
+        return virtualFolders
+            .Where(s => recursive
+                ? s.StartsWith(virtualPath)
+                : IsDirectChild(virtualPath, s)) // non-recursive: only match folders directly in the folder
+            .ToList();
+    }
+
+    /// <summary>
+    /// Determines if a folder is a direct child of the given parent folder.
+    /// </summary>
+    private bool IsDirectChild(string parentPath, string childPath)
+    {
+        if (!childPath.StartsWith(parentPath, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        // Get the remaining part of the child path after the parent path
+        return (childPath.Substring(parentPath.Length)).Count(c => c == '/') == 1;
     }
 
     /// <summary>
     /// Get list of files in a given folder (list of paths) with additional extension filtering.
     /// Extension string must be provided without a dot.
     /// </summary>
-    public List<string> GetFilesInFolder(string virtualPath, string extension)
+    public List<string> GetFilesInFolder(string virtualPath, string extension, bool recursive = false)
     {
-        return GetFilesInFolder(virtualPath)
+        return GetFilesInFolder(virtualPath, recursive)
             .Where(s => s.EndsWith("." + extension, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
-
-    /// <summary>
-    /// Get list of all file entries in the VFS.
-    /// </summary>
-    public IReadOnlyCollection<string> Entries => virtualFiles.Keys;
 
 }

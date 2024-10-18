@@ -42,17 +42,26 @@ Stream stream = vfs.GetFileStream(virtualPath);
 // get all contents of the file as byte array
 byte[] content = vfs.GetFileContents(virtualPath);
 
-// you can get a list of all entry paths
+// or if it's a text file - get the text directly
+string text = GetFileContentsAsText(virtualPath);
+
+// you can get a list of all entry paths (virtual files)
 List<string> allEntries = vfs.Entries;
+
+// you can get a list of all folders
+List<string> allFolders = vfs.Folders;
 
 // you can also get all files in a specific folder
 List<string> filesInFolder = vfs.GetFilesInFolder(virtualPath);
 
 // same as above, but you can also filter by extension
 List<string> filesInFolderWithExtension = vfs.GetFilesInFolder(virtualPath, "txt");
+
+// ...and there are a few more functions you can call.
 ```
 
 ## Changes
+ - v1.3 - Recursive search, ability to read text directly, ability to work with folders, etc.
  - v1.2 - Some refactoring and improvements based on feedback received.
  - v1.1 - Added folder indexing, some edge case checks and some minor improvements.
  - v1.0 - Initial release.
