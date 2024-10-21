@@ -61,6 +61,7 @@ List<string> filesInFolderWithExtension = vfs.GetFilesInFolder(virtualPath, "txt
 ```
 
 ## Changes
+ - v1.3.1 - Switched to netstandard2.0 to improve compatibility.
  - v1.3 - Recursive search, ability to read text directly, ability to work with folders, etc.
  - v1.2 - Some refactoring and improvements based on feedback received.
  - v1.1 - Added folder indexing, some edge case checks and some minor improvements.

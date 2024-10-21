@@ -140,7 +140,7 @@ public class VFSManager
     public bool FolderExists(string virtualPath)
     {
         // add final slash if needed
-        if (virtualPath[^1] != '/')
+        if (!virtualPath.EndsWith("/"))
             virtualPath += '/';
 
         return virtualFolders.Contains(NormalizePath(virtualPath));
