@@ -69,7 +69,7 @@ class Program
         Console.WriteLine();
 
         // check recursion
-        Console.WriteLine("Get file list recursively:");
+        Console.WriteLine("Get file list:");
         var list1 = vfs.GetFilesInFolder("",false);
         Console.WriteLine("Files in root no recursion: " + string.Join(", ", list1));
         var list2 = vfs.GetFilesInFolder("", true);
@@ -81,7 +81,7 @@ class Program
         Console.WriteLine();
 
         // check recursion 2
-        Console.WriteLine("Get folder list recursively:");
+        Console.WriteLine("Get folder list:");
         var list5 = vfs.GetFoldersInFolder("", false);
         Console.WriteLine("Folders in root no recursion: " + string.Join(", ", list5));
         var list6 = vfs.GetFoldersInFolder("", true);

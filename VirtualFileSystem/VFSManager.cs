@@ -82,7 +82,7 @@ public class VFSManager
 
                 // register virtual folder if it isn't registered yet
                 var virtualFolder = NormalizePath(Path.GetDirectoryName(virtualPath) ?? "");
-                if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder + "/"))
+                if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder + "/", StringComparer.OrdinalIgnoreCase))
                     virtualFolders.Add(virtualFolder + "/");
             }
         }
@@ -120,7 +120,7 @@ public class VFSManager
 
             // register virtual folder if it isn't registered yet
             var virtualFolder = NormalizePath(Path.GetDirectoryName(relativePath) ?? "");
-            if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder + "/"))
+            if (!string.IsNullOrEmpty(virtualFolder) && !virtualFolders.Contains(virtualFolder + "/", StringComparer.OrdinalIgnoreCase))
                 virtualFolders.Add(virtualFolder + "/");
         }
 
@@ -182,7 +182,7 @@ public class VFSManager
     }
 
     /// <summary>
-    /// Get list of files in a given folder (list of paths).
+    /// Get list of files in a given folder (list of their paths).
     /// </summary>
     public List<string> GetFilesInFolder(string virtualPath, bool recursive = false)
     {
@@ -200,10 +200,11 @@ public class VFSManager
         if (!virtualFolders.Contains(virtualPath))
             return new();
 
+        // finally get the file list (if any)
         return virtualFiles.Keys
             .Where(s => recursive
                 ? s.StartsWith(virtualPath, StringComparison.OrdinalIgnoreCase)
-                : Path.GetDirectoryName(s) == virtualPath.TrimEnd('/')) // non-recursive: only match files directly in the folder
+                : s.StartsWith(virtualPath, StringComparison.OrdinalIgnoreCase) && s.IndexOf('/', virtualPath.Length) == -1)
             .ToList();
     }
 
@@ -218,7 +219,7 @@ public class VFSManager
 
         return virtualFolders
             .Where(s => recursive
-                ? s.StartsWith(virtualPath)
+                ? s.StartsWith(virtualPath) && !s.Equals(virtualPath, StringComparison.OrdinalIgnoreCase)
                 : IsDirectChild(virtualPath, s)) // non-recursive: only match folders directly in the folder
             .ToList();
     }

@@ -60,7 +60,11 @@ List<string> filesInFolderWithExtension = vfs.GetFilesInFolder(virtualPath, "txt
 // ...and there are a few more functions you can call.
 ```
 
+## Notes
+ - Paths are non case sensitive. "Some/Path/To/File.txt" is the same as "some/path/to/file.txt".
+
 ## Changes
+ - v1.3.2 - Fixed bugs with files and folders lookup. Fixed test project target framework. Improved test project.
  - v1.3.1 - Switched to netstandard2.0 to improve compatibility.
  - v1.3 - Recursive search, ability to read text directly, ability to work with folders, etc.
  - v1.2 - Some refactoring and improvements based on feedback received.
